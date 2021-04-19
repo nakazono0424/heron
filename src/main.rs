@@ -41,12 +41,9 @@ fn main() {
     let command = &args[1];
     match command.as_str() {
         "forecast" => {
-            // let events = vec![
-            //     Utc.ymd(2013, 1, 11),
-            //     Utc.ymd(2014, 1, 11),
-            //     Utc.ymd(2015, 1, 11),
-            // ];
-            let events_list = google::google_calendar::get_today_schedule("".to_string());
+            let events_list = google::google_calendar::get_today_schedule(
+                "is2imfc9l68c9ohurj8m84rehg@group.calendar.google.com".to_string(),
+            );
             let mut events: Vec<Date<Utc>> = events_list
                 .items
                 .iter()
@@ -64,21 +61,19 @@ fn main() {
                 .collect();
             let first = fiscal_year_first_date(events[0]);
             let last = events.last().unwrap().clone();
-            // loop {
-            let range_candidates: Vec<i64> = (-3..4).collect();
-            let range_recurrence = vec![first, last];
             let middle = start.elapsed();
-            let forecasted = forecaster::forecast(range_recurrence, &range_candidates, &events);
-            // let fdate = Date::from_utc(
-            //     NaiveDate::parse_from_str(forecasted, "%Y-%m-%d").unwrap(),
-            //     Utc,
-            // );
-            // events.push(forecasted);
-            println!("forecast: {:?}", forecasted);
-            // if forecasted > Utc.ymd(2022, 4, 1) {
-            //     break;
-            // }
-            // }
+            loop {
+                //
+                let range_candidates: Vec<i64> = (-3..4).collect();
+                let range_recurrence = vec![first, last];
+                let forecasted = forecaster::forecast(range_recurrence, &range_candidates, &events);
+                events.push(forecasted); //
+                println!("forecast: {:?}", forecasted);
+                if forecasted > Utc.ymd(2022, 4, 1) {
+                    //
+                    break; //
+                } //
+            } //
             let end = start.elapsed();
             println!(
                 "{}.{:0.3}秒経過",
@@ -92,7 +87,10 @@ fn main() {
             );
         }
         "show" => {
-            let event_list = google::google_calendar::get_today_schedule("".to_string());
+            let event_list = google::google_calendar::get_today_schedule(
+                "is2imfc9l68c9ohurj8m84rehg@group.calendar.google.com".to_string(),
+            );
+            println!("items: {}", event_list.items.len());
 
             for item in event_list.items {
                 println!(
