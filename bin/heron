@@ -27,7 +27,7 @@ THIS_FILE_PATH <- function() {
         invisible(NULL)
 }
 EXEC_PATH <- getwd()
-setwd(normalizePath(paste0(THIS_FILE_PATH(), '/../..')))
+# setwd(normalizePath(paste0(THIS_FILE_PATH(), '/../..')))
 
 source('./lib/forecaster.R')
 source('./lib/db_manager.R')
@@ -92,7 +92,7 @@ if(args$forecast){
     ################################################################
     ## Option: --candidate-range
     ################################################################
-    num <- as.integer(args$`candidate-range`)
+    num <- as.integer(args$candidate_range)
     if(!is.na(num) && (num > 0) && (num %% 2 == 1)){
         n <- (num-1)/2
         range.candidates <- -n:n
