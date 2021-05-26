@@ -104,27 +104,27 @@ fn get_big_wave_cycle(dates: &Vec<Date<Utc>>, range: &Vec<Date<Utc>>) -> usize {
 
 fn closest_event_index(events: &Vec<Date<Utc>>, date: Date<Utc>) -> usize {
     let last = events.len() - 1;
+    let mut index: usize = 0;
     for i in 0..=last {
         if events[i] <= date && date <= events[i + 1] {
-            if date - events[i] < events[i + 1] - date {
-                i
+            if (date - events[i]).num_days() < (events[i + 1] - date).num_days() {
+                index = i;
             } else {
-                i + 1
+                index = i + 1;
             };
         }
     }
 
     if events[last] < date {
-        last
-    } else {
-        0
+        index = last
     }
+
+    index
 }
 
 fn get_candidates(events: &Vec<Date<Utc>>, range: &Vec<i64>, period: usize) -> Vec<Date<Utc>> {
     let latest = events.last().unwrap();
     let criterion = *latest - Duration::days(period as i64);
-
     let i = closest_event_index(events, criterion);
     let mut d = (events[i + 1] - events[i]).num_days();
     if d > 365 {

@@ -42,7 +42,7 @@ fn print_typename<T>(_: T) {
     println!("{}", std::any::type_name::<T>());
 }
 
-fn get_oneday_schedule(email: String, oneday: Date<Local>) -> CalendarEvent {
+pub fn get_oneday_schedule(email: String, recurrence: String) -> CalendarEvent {
     let token: AccessTokenResponse = google_auth::get_access_token();
     let mut headers = header::HeaderMap::new();
     headers.insert(
@@ -60,8 +60,13 @@ fn get_oneday_schedule(email: String, oneday: Date<Local>) -> CalendarEvent {
         ))
         .query(&[
             ("timeZone", "jst"),
-            ("sharedExtendedProperty", "recurrence_name=GN検討打合せ"),
+            (
+                "sharedExtendedProperty",
+                &format!("recurrence_name={}", recurrence),
+            ),
             ("maxResults", "2000"),
+	    ("orderBy", "starttime"),
+	    ("singleEvents", "true")
             // ("timeMin", &oneday.and_hms(0, 0, 0).to_rfc3339()),
             // ("timeMax", &oneday.and_hms(23, 59, 59).to_rfc3339()),
         ])
@@ -73,6 +78,6 @@ fn get_oneday_schedule(email: String, oneday: Date<Local>) -> CalendarEvent {
     serde_json::from_str(&response).unwrap()
 }
 
-pub fn get_today_schedule(email: String) -> CalendarEvent {
-    get_oneday_schedule(email, Local::today())
-}
+// pub fn get_today_schedule(email: String) -> CalendarEvent {
+//     get_oneday_schedule(email, )
+// }
