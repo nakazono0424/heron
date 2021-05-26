@@ -16,6 +16,7 @@ Options:
   --rname <rname>             Recurrence name on DB. Required --input=hoge.db
   --sampling-range <from-to>  From and to dates. Format must be YYYY/MM/DD-YYYY/MM/DD.
   --candidate-range <num>     Parameter for debug. [default: 7]
+  --forecast_year <year>      Format must be YYYY.
 " -> doc
 
 THIS_FILE_PATH <- function() {
@@ -39,6 +40,7 @@ RelativePath <- function(base, path){
     else return(paste0(base, '/', path))
 }
 #---------------------------------------------------------------
+t <- proc.time()
 
 args <- docopt(doc)
 
@@ -100,19 +102,41 @@ if(args$forecast){
         stop(paste0('Bad candidate-range \"', args$`candidate-range`, '\".'))
     }
 
-    ## Forecast
-    forecasted <- forecast(range.recurrence, range.candidates, events)
-    DatePrettyPrint(forecasted)
-
+    ################################################################
+    ## Option: --forecast_year
+    ################################################################
+    if(is.null(args$forecast_year)){
+        ## Forecast
+	print(proc.time() - t)
+	forecasted <- forecast(range.recurrence, range.candidates, events)
+	DatePrettyPrint(forecasted)
+	print(proc.time() - t)
+    } else {
+	print(proc.time() - t)
+      	forecast_year = as.integer(args$forecast_year)
+	forecast_start = as.Date(paste0(forecast_year, "-04-01"))
+	forecast_end = as.Date(paste0(forecast_year+1, "-03-31"))
+	## Forecast
+	while (TRUE) {
+	      range.recurrence <- c(head(events, n=1), tail(events, n=1))
+	      forecasted <- forecast(range.recurrence, range.candidates, events)
+	      forecasted <- as.Date(forecasted)
+	      events <- c(events, forecasted)
+	      if (forecasted < forecast_start) next
+	      if (forecasted > forecast_end) break
+	      DatePrettyPrint(forecasted)
+	}
+	print(proc.time() - t)
+    }
 ################################################################
 ## Command: visualize
 ################################################################
-}else if(args$visualize){
+}else if(args$visualize) {
 
     ################################################################
     ## Option: --input
     ################################################################
-    if(args$input == '-'){
+    if(args$input == '-') {
         events <- read.csv('stdin', header=F, strip.white=T, as.is=T)
         colnames(events) <- c('name', 'date')
         shiny.events.list <- list(events)
